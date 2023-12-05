@@ -1,0 +1,70 @@
+import pyxel,random
+LARG = 256
+HAUT = 256
+
+class Bulle():
+    """
+    représente une bulle, représentée par des variables globales dans les étapes précédentes
+    ...
+    """
+    def __init__(self, xbulle, ybulle, rbulle,vbulle,couleur):
+        """
+        initialise les valeurs des attribut d'une bulle avec les paramètres xbulle, ybulle,
+        rbulle
+        """
+        self.x = xbulle
+        self.y = ybulle
+        self.r = rbulle
+        self.v = vbulle
+        self.couleur = couleur
+        
+    def dessiner(self):
+        """
+        méthode à compléter vous-mêmes
+        """
+        if self.couleur[0] == True:
+            pyxel.circ(self.x,self.y,self.r,random.randint(0,10))
+        else:
+            pyxel.circ(self.x,self.y,self.r,self.couleur[1])
+    
+    def deplacer(self):
+        """
+        déplace une bulle du bas vers le haut, retour en bas après 
+        """
+        self.x+=self.v[0]
+        self.y+=self.v[1]
+            
+
+        if self.x< self.r:
+            self.v[0]=-self.v[0]
+        
+        if self.x>LARG-self.r:
+            self.v[0]=-self.v[0]
+            
+        
+        if self.y< self.r:
+            self.v[1]=-self.v[1]
+        
+        if self.y>HAUT-self.r:
+            self.v[1]=- self.v[1]  
+        
+
+def draw():
+    pyxel.cls(0)
+    for b in bulles:
+        b.dessiner()
+
+def update():
+    for b in bulles:
+        b.deplacer()
+
+
+pyxel.init(LARG, HAUT, title="Bulles POO")
+bulles=[]
+bulles.append(Bulle(LARG/2, HAUT/2, 8,[3,4],(True,3)))
+bulles.append(Bulle(LARG/3, HAUT/2, 8,[4,2],(False,5)))
+bulles.append(Bulle(LARG/4, HAUT/2, 8,[2,7],(True,0)))
+#bulles.append(Bulle(LARG/5, HAUT, 8,(5,8),(True,0)))
+#bulles.append(Bulle(LARG/6, HAUT, 8,(1,1),(False,3)))
+pyxel.run(update, draw)
+
