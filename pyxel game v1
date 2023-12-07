@@ -1,37 +1,55 @@
-import pyxel,random
+import pyxel,random,math
 LARG = 512
 HAUT = 256
-cadence = False #pour augmenter vitesse après rebond
+cadence = False 
+taille = 6
 
-class Bulle():
-    """ représente une bulle, représentée par des variables globales dans les étapes précédentes
+class Bulle:
+    """ représente une bulle, représentée par des variables x,y,rayon,vitesse
     """
-    def __init__(self, xbulle, ybulle, rbulle):
+    def __init__(self, xbulle, ybulle, rbulle,vitesse,rainbow,statique):
         """ initialise les valeurs des attribut d'une bulle avec les paramètres xbulle, ybulle, rbulle
         """
         self.x = xbulle
         self.y = ybulle
         self.r = rbulle
-        self.v = [0,0]  #vitesse initiale nulle
-        self.c = random.randint(1,15) #couleur
+        #random.randint(taille//2,taille)
+        self.c = 8
+        self.v = [0,0] #vitesse nulle
+        self.rainbow = rainbow
+        self.statique = statique
 
-    def dessiner(self):
-        pyxel.circ(self.x,self.y,self.r,self.c)
-            
     def deplacer(self):
-        self.x += self.v[0] 
-        self.y += self.v[1] 
+        if not self.statique:
+            self.x += self.v[0]
+            self.y += self.v[1]
             
     def rebond(self):
         if self.x <= self.r :
             self.v[0] =- self.v[0]
+            if self.rainbow:
+                self.c = random.randint(1,10)
         if self.x >= LARG-self.r:
             self.v[0] =- self.v[0]
+            if self.rainbow:
+                self.c = random.randint(1,10)
         if self.y <= self.r:
             self.v[1] =- self.v[1]
+            if self.rainbow:
+                self.c = random.randint(1,10)
         if self.y >= HAUT-self.r:
             self.v[1] =- self.v[1]
-
+            if self.rainbow:
+                self.c = random.randint(1,10)
+            
+    def taille(self):
+        assez = (self.x + self.r < LARG) and (self.y + self.r < HAUT)
+        place = (self.x - self.r > 0) and (self.y - self.r > 0)
+        if pyxel.btn(pyxel.KEY_G) == True and assez and place :
+            self.r += 1
+        if pyxel.btn(pyxel.KEY_D) == True :
+            self.r -= 1
+            
     def mouvement(self):
         if pyxel.btn(pyxel.KEY_UP) == True:
             self.v[1] -= 1
@@ -42,36 +60,43 @@ class Bulle():
         if pyxel.btn(pyxel.KEY_RIGHT) == True:
             self.v[0] += 1
             
-    def taille(self):
-        assez = (self.x + self.r < LARG) and (self.y + self.r < HAUT)
-        place = (self.x - self.r > 0) and (self.y - self.r > 0)
-        if pyxel.btn(pyxel.KEY_G) == True and assez and place :
-            self.r += 1
-        if pyxel.btn(pyxel.KEY_D) == True :
-            self.r -= 1
-    
-       
     def proche(self,bille):
         dx = self.x - bille.x
         dy = self.y - bille.y
         return math.sqrt(dx**2-dy**2) < (self.r + bille.r)
-        
+    
     def collision(self,bille):
         if self.proche(bille):
             self.c, bille.c = bille.c, self.c
-         
-def draw():
-    pyxel.cls(0)
-    bille.dessiner()
-    
-def update():
-    bille.rebond()
-    bille.mouvement()
-    bille.taille()
-    bille.deplacer()
-    
+
+    def update(self):
+        self.rebond()
+        self.mouvement()
+        self.taille()
+        self.deplacer()
+        
+    def draw(self):
+        pyxel.circ(self.x,self.y,self.r,self.c)
 
 
-pyxel.init(LARG, HAUT, title="Bulle au clavier")
-bille = Bulle(LARG/2, HAUT/2, 8)
-pyxel.run(update,draw)
+class Game:
+    def __init__(self):
+        pyxel.init(LARG, HAUT, title="Bulle MOOV", fps=24)
+        self.billeA=Bulle(LARG/2, HAUT/2, 8,1,False,False)
+        self.billeB=Bulle(LARG/3, HAUT/4, 8,1,False,False)
+        pyxel.run(self.update, self.draw)
+        
+    def draw(self):
+        pyxel.cls(0)
+        self.billeA.draw()
+        self.billeB.draw()
+    
+    def update(self):
+        self.billeA.update()
+        self.billeB.update()
+        self.billeA.collision(billeB)
+        self.billeB.collision(billeA)
+
+
+Game()
+
